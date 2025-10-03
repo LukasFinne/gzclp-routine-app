@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.gzclp_routine.Greeting
+import se.finne.lukas.gzclp.GzclpScreen
 import se.finne.lukas.navigation.Gzclp
 import se.finne.lukas.navigation.Settings
 
@@ -14,9 +15,7 @@ import se.finne.lukas.navigation.Settings
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier){
     NavHost(navController, modifier = modifier, startDestination = Gzclp ){
         composable<Gzclp>{
-            Column(modifier = modifier){
-                Greeting("Gzclp")
-            }
+            GzclpScreen()
         }
 
         composable<Settings>{

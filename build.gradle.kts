@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.dagger.hilt.android) apply false
+    id("com.android.library") version "8.13.0" apply false
 }

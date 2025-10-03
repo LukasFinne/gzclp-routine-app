@@ -53,6 +53,7 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.57.2")
 
     implementation(project(":libs:navigation"))
+    implementation(project(":libs:gzclp"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
