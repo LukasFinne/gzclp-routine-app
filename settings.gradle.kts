@@ -23,3 +23,4 @@ rootProject.name = "gzclp-routine"
 include(":app")
 
 include(":libs:gzclp")
+include(":libs:navigation")

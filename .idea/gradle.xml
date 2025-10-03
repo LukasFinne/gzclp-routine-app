@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/libs" />
             <option value="$PROJECT_DIR$/libs/gzclp" />
+            <option value="$PROJECT_DIR$/libs/navigation" />
           </set>
         </option>
       </GradleProjectSettings>
