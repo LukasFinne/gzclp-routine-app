@@ -15,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,6 +24,7 @@ import androidx.compose.runtime.setValue
 import se.finne.lukas.navigation.Gzclp
 import se.finne.lukas.navigation.Settings
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(modifier: Modifier = Modifier){
     val navController = rememberNavController()

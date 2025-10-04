@@ -33,48 +33,46 @@ enum class Workouts(val id: String){
     A1("A1"), A2("A2"), B1("B1"),B2("B2")
 }
 
-sealed class T1{
-    data class Squat(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-    data class OHP(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-    data class DeadLift(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-    data class Bench(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-}
+//sealed class T11{
+//    data class OHP(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
+//    data class DeadLift(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
+//    data class Bench(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
+//}
+//
+//sealed class T22{
+//    data class Squat(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
+//    data class OHP(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
+//    data class DeadLift(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
+//}
+//
+//sealed class T33{
+//    data class DumbbellRow(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
+//}
+//
+//sealed class A1{
+//    data class Squat(val scheme: T1Lifts = T1Lifts.FiveThree, val kg: Int = 8, val lb: Int = 9): T1()
+//    data class Bench(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
+//    data class LatPullDown(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
+//}
 
-sealed class T2{
-    data class Squat(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-    data class OHP(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-    data class DeadLift(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-    data class Bench(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-}
 
-sealed class T3{
-    data class DumbbellRow(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
-    data class LatPullDown(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
-}
-
-data class Workout(val t1: T1, val t2: T2, val t3: T3)
-
-
-sealed class Lifts{
-    data class Lift(val scheme: T1Lifts)
-}
 sealed class GzClpState{
     data object Loading: GzClpState()
-    data class Loaded(val workout: Workout): GzClpState()
+    data class Loaded(val state: Workout): GzClpState()
+}
+
+sealed class State{
+    data class A1State(val scheme: T1Lifts = T1Lifts.FiveThree, val kg: Int = 8, val lb: Int = 9): State()
 }
 
 sealed class WorkOutState{
-    data object T1: WorkOutState()
-    data object T2: WorkOutState()
-    data object T3: WorkOutState()
+
 }
 
 
 @HiltViewModel
 class GzclpViewModel @Inject constructor(): ViewModel() {
 
-    private val _workOutState = MutableStateFlow<WorkOutState>(WorkOutState.T1)
-    val workOutState = _workOutState
     val uiState: StateFlow<GzClpState> = watchWorkout()
         .stateIn(
             scope = viewModelScope,
@@ -83,24 +81,39 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
         )
 
     private fun watchWorkout(): Flow<GzClpState> =
-        getWorkOut(Workouts.A1.id).map { GzClpState.Loaded(it) }
+        getWorkOut(Workouts.A1.id)
 
 
 
     fun updateWorkOutState(workOutState: WorkOutState){
-        _workOutState.update {
-            workOutState
-        }
     }
 
 }
 
 
-fun getWorkOut(id : String): Flow<Workout> = flowOf(
+fun getWorkOut(id : String): Flow<GzClpState> = flowOf(
    when(Workouts.valueOf(id)){
-        Workouts.A1 -> Workout(t1=T1.Squat(), t2 = T2.Bench(), t3 = T3.LatPullDown())
-        Workouts.A2 -> Workout(t1=T1.Bench(), t2 = T2.Squat(), t3 = T3.LatPullDown())
-        Workouts.B1 -> Workout(t1=T1.OHP(), t2 = T2.DeadLift(), t3 = T3.DumbbellRow())
-        Workouts.B2 -> Workout(t1=T1.DeadLift(), t2 = T2.OHP(), t3 = T3.DumbbellRow())
+        Workouts.A1 -> GzClpState.Loaded(
+            Workout(
+                name ="Squat day",
+                tierOneLift = Lift(
+                    name = "Squat",
+                    sets = T1Lifts.FiveThree.set,
+                    reps = T1Lifts.FiveThree.rep,
+                ),
+                tierTwoLift = Lift(
+                    name = "Bench",
+                    sets = T2Lifts.ThreeTen.set,
+                    reps = T2Lifts.ThreeTen.rep,
+                ),
+                tierThreeLift = Lift(
+                    name = "LatPullDown",
+                    sets = T3Lifts.ThreeFifteen.set,
+                    reps = T3Lifts.ThreeFifteen.rep,
+                )
+
+            )
+        )
+       else -> GzClpState.Loading
     }
 )
