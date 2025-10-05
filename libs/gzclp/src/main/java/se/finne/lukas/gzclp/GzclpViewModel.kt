@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -38,38 +37,18 @@ enum class Workouts(val id: String){
     A1("A1"), A2("A2"), B1("B1"),B2("B2")
 }
 
-//sealed class T11{
-//    data class OHP(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-//    data class DeadLift(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-//    data class Bench(val scheme: T1Lifts = T1Lifts.FiveThree): T1()
-//}
-//
-//sealed class T22{
-//    data class Squat(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-//    data class OHP(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-//    data class DeadLift(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-//}
-//
-//sealed class T33{
-//    data class DumbbellRow(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
-//}
-//
-//sealed class A1{
-//    data class Squat(val scheme: T1Lifts = T1Lifts.FiveThree, val kg: Int = 8, val lb: Int = 9): T1()
-//    data class Bench(val scheme: T2Lifts = T2Lifts.ThreeTen): T2()
-//    data class LatPullDown(val scheme: T3Lifts = T3Lifts.ThreeFifteen): T3()
-//}
-
 
 sealed class GzClpState{
     data object Loading: GzClpState()
     data class Loaded(val name: String, val lift: Lift?): GzClpState()
 }
 
-data class Testout(val name: String, val lift: Lift)
+data class Testout(val name: String, val lift: Lift?)
 
 @HiltViewModel
 class GzclpViewModel @Inject constructor(): ViewModel() {
+
+    private val selectedLiftKey = MutableStateFlow("T1")
 
     val uiState: StateFlow<GzClpState> = watchWorkout()
         .stateIn(
@@ -78,64 +57,51 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
             initialValue = GzClpState.Loading
         )
 
-    val filter = MutableStateFlow<String>("T1")
-
-
-    private fun watchWorkout(): Flow<GzClpState> =
-        combine(
-            filter,
-            getWorkOut(Workouts.A1.id)
-        ) { filter, workout ->
-
-
-            val filtered: Lift? = workout.lifts["T1"]
-            Testout(workout.name, filtered ?: Lift("Not found", 0,0))
-        }.map {
-            Loaded(it.name, it.lift)
-        }.catch { e ->
-            Log.d("Error",  "${e}")
-        }
-
-
-
-
-    fun updateWorkOutState(){
+    fun onLiftSelected(liftKey: String) {
+        selectedLiftKey.update { liftKey }
     }
 
-}
+    private fun watchWorkout(): Flow<GzClpState> =
+        getWorkOut(Workouts.A1.id).combine(selectedLiftKey) { workout, liftKey ->
+            GzClpState.Loaded(workout.name, workout.lifts[liftKey])
+        }
 
+    fun getWorkOut(id : String): Flow<Workout> = flowOf(
+        when(Workouts.valueOf(id)){
+            Workouts.A1 ->
+                Workout(
+                    name ="Squat day",
+                    lifts = mapOf(
+                        "T1" to
+                                Lift(
+                                    name = "Squat",
+                                    sets = T1Lifts.FiveThree.set,
+                                    reps = T1Lifts.FiveThree.rep,
+                                    nextWorkout = "T2"
 
-fun getWorkOut(id : String): Flow<Workout> = flowOf(
-   when(Workouts.valueOf(id)){
-        Workouts.A1 ->
-            Workout(
-                name ="Squat day",
-                lifts = mapOf(
-                    "T1" to
-                            Lift(
-                                name = "Squat",
-                                sets = T1Lifts.FiveThree.set,
-                                reps = T1Lifts.FiveThree.rep,
-                            ),
-                    "T2" to
+                                ),
+                        "T2" to
 
-                            Lift(
-                                name = "Bench",
-                                sets = T2Lifts.ThreeTen.set,
-                                reps = T2Lifts.ThreeTen.rep,
-                            ),
-                    "T3" to
-                            Lift(
-                                name = "LatPullDown",
-                                sets = T3Lifts.ThreeFifteen.set,
-                                reps = T3Lifts.ThreeFifteen.rep,
-                            )
+                                Lift(
+                                    name = "Bench",
+                                    sets = T2Lifts.ThreeTen.set,
+                                    reps = T2Lifts.ThreeTen.rep,
+                                    nextWorkout = "T3"
+                                ),
+                        "T3" to
+                                Lift(
+                                    name = "LatPullDown",
+                                    sets = T3Lifts.ThreeFifteen.set,
+                                    reps = T3Lifts.ThreeFifteen.rep,
+                                    nextWorkout = "T1"
+                                )
+                    )
+                    ,
                 )
-                ,
+            else -> Workout(
+                "else",
+                lifts = mapOf()
             )
-        else -> Workout(
-            "else",
-            lifts = mapOf()
-        )
-   }
-)
+        }
+    )
+}

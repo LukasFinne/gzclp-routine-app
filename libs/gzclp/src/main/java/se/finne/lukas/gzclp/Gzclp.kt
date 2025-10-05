@@ -42,6 +42,8 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
                             Text("Failed")
                         }
                         Button(onClick ={
+                            if (data.lift?.nextWorkout != null)
+                                viewModel.onLiftSelected(data.lift.nextWorkout)
                         }) {
                             Text("Success")
                         }
