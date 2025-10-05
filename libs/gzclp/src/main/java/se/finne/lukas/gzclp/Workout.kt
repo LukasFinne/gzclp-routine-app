@@ -2,9 +2,7 @@ package se.finne.lukas.gzclp
 
 data class Workout (
     val name: String,
-    val tierOneLift: Lift,
-    val tierTwoLift: Lift,
-    val tierThreeLift: Lift
+    val lifts: Map<String,Lift>
     )
 
 data class Lift(

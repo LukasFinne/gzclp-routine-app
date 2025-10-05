@@ -1,5 +1,6 @@
 package se.finne.lukas.gzclp
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,10 +9,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import se.finne.lukas.gzclp.GzClpState.*
 
 
 // Beöver komma ihåg nurvarande
@@ -58,17 +63,10 @@ enum class Workouts(val id: String){
 
 sealed class GzClpState{
     data object Loading: GzClpState()
-    data class Loaded(val state: Workout): GzClpState()
+    data class Loaded(val name: String, val lift: Lift?): GzClpState()
 }
 
-sealed class State{
-    data class A1State(val scheme: T1Lifts = T1Lifts.FiveThree, val kg: Int = 8, val lb: Int = 9): State()
-}
-
-sealed class WorkOutState{
-
-}
-
+data class Testout(val name: String, val lift: Lift)
 
 @HiltViewModel
 class GzclpViewModel @Inject constructor(): ViewModel() {
@@ -80,40 +78,64 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
             initialValue = GzClpState.Loading
         )
 
+    val filter = MutableStateFlow<String>("T1")
+
+
     private fun watchWorkout(): Flow<GzClpState> =
-        getWorkOut(Workouts.A1.id)
+        combine(
+            filter,
+            getWorkOut(Workouts.A1.id)
+        ) { filter, workout ->
+
+
+            val filtered: Lift? = workout.lifts["T1"]
+            Testout(workout.name, filtered ?: Lift("Not found", 0,0))
+        }.map {
+            Loaded(it.name, it.lift)
+        }.catch { e ->
+            Log.d("Error",  "${e}")
+        }
 
 
 
-    fun updateWorkOutState(workOutState: WorkOutState){
+
+    fun updateWorkOutState(){
     }
 
 }
 
 
-fun getWorkOut(id : String): Flow<GzClpState> = flowOf(
+fun getWorkOut(id : String): Flow<Workout> = flowOf(
    when(Workouts.valueOf(id)){
-        Workouts.A1 -> GzClpState.Loaded(
+        Workouts.A1 ->
             Workout(
                 name ="Squat day",
-                tierOneLift = Lift(
-                    name = "Squat",
-                    sets = T1Lifts.FiveThree.set,
-                    reps = T1Lifts.FiveThree.rep,
-                ),
-                tierTwoLift = Lift(
-                    name = "Bench",
-                    sets = T2Lifts.ThreeTen.set,
-                    reps = T2Lifts.ThreeTen.rep,
-                ),
-                tierThreeLift = Lift(
-                    name = "LatPullDown",
-                    sets = T3Lifts.ThreeFifteen.set,
-                    reps = T3Lifts.ThreeFifteen.rep,
-                )
+                lifts = mapOf(
+                    "T1" to
+                            Lift(
+                                name = "Squat",
+                                sets = T1Lifts.FiveThree.set,
+                                reps = T1Lifts.FiveThree.rep,
+                            ),
+                    "T2" to
 
+                            Lift(
+                                name = "Bench",
+                                sets = T2Lifts.ThreeTen.set,
+                                reps = T2Lifts.ThreeTen.rep,
+                            ),
+                    "T3" to
+                            Lift(
+                                name = "LatPullDown",
+                                sets = T3Lifts.ThreeFifteen.set,
+                                reps = T3Lifts.ThreeFifteen.rep,
+                            )
+                )
+                ,
             )
+        else -> Workout(
+            "else",
+            lifts = mapOf()
         )
-       else -> GzClpState.Loading
-    }
+   }
 )
