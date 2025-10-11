@@ -48,7 +48,6 @@ sealed class GzClpState{
     data class Loaded(val name: String, val lift: Lift?): GzClpState()
 }
 
-data class Testout(val name: String, val lift: Lift?)
 
 @HiltViewModel
 class GzclpViewModel @Inject constructor(): ViewModel() {
@@ -64,19 +63,23 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
 
     private val _timerValue = MutableStateFlow<Int?>(null)
     val timerValue: StateFlow<Int?> = _timerValue.asStateFlow()
-    private var timerJob: Job? = null
 
     fun startTimer(minutes: Int) {
-        timerJob?.cancel()
-        timerJob = viewModelScope.launch {
+        viewModelScope.launch {
             var seconds = minutes * 60
-            _timerValue.value = seconds
+            _timerValue.update {
+                 seconds
+            }
             while (seconds > 0) {
                 delay(1000)
                 seconds--
-                _timerValue.value = seconds
+                _timerValue.update {
+                   seconds
+                }
             }
-            _timerValue.value = null // Reset when done
+            _timerValue.update {
+                null
+            }
         }
     }
 

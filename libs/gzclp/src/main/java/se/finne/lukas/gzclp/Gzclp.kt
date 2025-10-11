@@ -39,24 +39,21 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
 
-                    timerValue?.let {
-                        Text(
-                            text = "%02d:%02d".format(it / 60, it % 60),
-                            fontSize = 48.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    } ?: ListItem(data.lift)
-
+                    ListItem(data.lift, timerValue)
 
                     Row( Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                        Button(onClick ={
+                        Button(
+                            enabled = timerValue == null,
+                            onClick ={
 
                         }) {
                             Text("Failed")
                         }
-                        Button(onClick ={
+                        Button(
+                            enabled = timerValue == null,
+                            onClick ={
                             if (data.lift?.nextWorkout != null) {
-                                viewModel.onLiftSelected(data.lift.nextWorkout)
+                               // viewModel.onLiftSelected(data.lift.nextWorkout)
                                 data.lift.restTime.let { viewModel.startTimer(it) }
                             }
                         }) {
@@ -78,7 +75,7 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
 
 @Composable
-fun ListItem(lift: Lift?, modifier: Modifier = Modifier){
+fun ListItem(lift: Lift?,timerValue: Int?, modifier: Modifier = Modifier){
 
     Column(modifier = modifier) {
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -87,22 +84,32 @@ fun ListItem(lift: Lift?, modifier: Modifier = Modifier){
         }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Weight", fontSize = 24.sp)
-                Text("${lift?.weight} Kg", fontWeight = FontWeight.Bold)
-            }
-            Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Set / Rep", fontSize = 24.sp)
-                Text("${lift?.sets ?:0 } / ${lift?.reps ?: 0}", fontWeight = FontWeight.Bold)
-            }
+            TextItem("Weight", "${lift?.weight} Kg")
+            TextItem("Set / Rep", "${lift?.sets} / ${lift?.reps}")
         }
 
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Rest Time", fontSize = 24.sp)
-
-            Row {
-                Text("${lift?.restTime} min", fontWeight = FontWeight.Bold)
-            }
+            TextItem(
+                "Rest Time",
+                timerValue?.let {
+                    "%02d:%02d".format(it / 60, it % 60)
+                } ?:
+                    "${lift?.restTime} min"
+            )
         }
+        Row(Modifier.fillMaxWidth().padding(top=16.dp), horizontalArrangement = Arrangement.Center){
+           TextItem(
+               "Current set",
+               "1"
+           )
+        }
+    }
+}
+
+@Composable
+fun TextItem(header:String, text: String, modifier: Modifier = Modifier){
+    Column(modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(header, fontSize = 24.sp)
+        Text(text, fontWeight = FontWeight.Bold)
     }
 }
