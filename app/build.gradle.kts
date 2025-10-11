@@ -55,6 +55,12 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
+
+    //Room
+    implementation(libs.androidx.room.room.runtime)
+    ksp(libs.androidx.room.room.compiler)
+    implementation(libs.androidx.room.room.ktx)
+
     implementation(project(":libs:navigation"))
     implementation(project(":libs:gzclp"))
 
