@@ -11,19 +11,29 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val timerValue by viewModel.timerValue.collectAsStateWithLifecycle()
+    val currentSet by viewModel.currentSet.collectAsStateWithLifecycle()
+
     when(val data = uiState){
         is GzClpState.Loaded -> {
             Column(modifier.fillMaxHeight()) {
@@ -33,21 +43,18 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround) {
 
-                    ListItem(data.lift)
+                    if(data.lift !=null){
+                        ListItem(data.lift,currentSet, timerValue)
 
-                    Row( Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                        Button(onClick ={
-
-                        }) {
-                            Text("Failed")
-                        }
-                        Button(onClick ={
-                            if (data.lift?.nextWorkout != null)
+                        Buttons(timerValue) {
+                            if(currentSet != data.lift.sets){
+                                viewModel.updateCurrentSet(data.lift.sets)
+                            }else{
                                 viewModel.onLiftSelected(data.lift.nextWorkout)
-                        }) {
-                            Text("Success")
+                            }
                         }
                     }
+
 
                 }
             }
@@ -63,33 +70,61 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
 
 @Composable
-fun ListItem(lift: Lift?, modifier: Modifier = Modifier){
+fun ListItem(lift: Lift,currentSet: Int, timerValue: Int?, modifier: Modifier = Modifier){
+
     Column(modifier = modifier) {
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Exercise", fontSize = 24.sp)
-            Text(lift?.name ?: "Not found", fontWeight = FontWeight.Bold)
+            Text(lift.name, fontWeight = FontWeight.Bold)
         }
 
-
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Weight", fontSize = 24.sp)
-                Text("10 Kg", fontWeight = FontWeight.Bold)
-            }
-            Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Set / Rep", fontSize = 24.sp)
-                Text("${lift?.sets ?:0 } / ${lift?.reps ?: 0}", fontWeight = FontWeight.Bold)
-            }
+            TextItem("Weight", "${lift.weight} Kg")
+            TextItem("Set / Rep", "${lift.sets} / ${lift.reps}")
         }
 
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Rest Time", fontSize = 24.sp)
-
-            Row {
-                Text("3 min", fontWeight = FontWeight.Bold)
-                Text(" / ", fontWeight = FontWeight.Bold)
-                Text("5 min", fontWeight = FontWeight.Bold)
-            }
+            TextItem(
+                "Rest Time",
+                timerValue?.let {
+                    "%02d:%02d".format(it / 60, it % 60)
+                } ?:
+                    "${lift.restTime} min"
+            )
         }
+        Row(Modifier.fillMaxWidth().padding(top=16.dp), horizontalArrangement = Arrangement.Center){
+           TextItem(
+               "Current set",
+              "$currentSet  / ${lift.sets}"
+           )
+        }
+    }
+
+}
+@Composable
+fun Buttons(timerValue: Int?, modifier: Modifier = Modifier, onClick:(Int) -> Unit){
+
+    Row( modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+        Button(
+            enabled = timerValue == null,
+            onClick ={
+
+            }) {
+            Text("Failed")
+        }
+        Button(
+            enabled = timerValue == null,
+            onClick ={
+                onClick(0,)
+            }) {
+            Text("Success")
+        }
+    }
+}
+@Composable
+fun TextItem(header:String, text: String, modifier: Modifier = Modifier){
+    Column(modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(header, fontSize = 24.sp)
+        Text(text, fontWeight = FontWeight.Bold)
     }
 }
