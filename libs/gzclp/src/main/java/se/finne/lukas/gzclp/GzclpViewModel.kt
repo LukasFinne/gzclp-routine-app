@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import se.finne.lukas.gzclp.GzClpState.*
 import java.util.Locale
+import kotlin.math.min
 
 
 // Beöver komma ihåg nurvarande
@@ -64,9 +65,12 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
     private val _timerValue = MutableStateFlow<Int?>(null)
     val timerValue: StateFlow<Int?> = _timerValue.asStateFlow()
 
+    private val _currentSet = MutableStateFlow<Int>(0)
+    val currentSet = _currentSet.asStateFlow()
+
     fun startTimer(minutes: Int) {
         viewModelScope.launch {
-            var seconds = minutes * 60
+            var seconds = minutes
             _timerValue.update {
                  seconds
             }
@@ -83,8 +87,19 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
         }
     }
 
+    fun updateCurrentSet(liftSet: Int){
+        _currentSet.update {
+            if(it == liftSet){
+                liftSet
+            }else {
+                it + 1
+            }
+        }
+    }
+
     fun onLiftSelected(liftKey: String) {
         selectedLiftKey.update { liftKey }
+        _currentSet.update { 0 }
     }
 
     private fun watchWorkout(): Flow<GzClpState> =
