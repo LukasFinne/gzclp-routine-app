@@ -24,3 +24,4 @@ include(":app")
 
 include(":libs:gzclp")
 include(":libs:navigation")
+include(":libs:room")

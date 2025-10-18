@@ -27,6 +27,7 @@ dependencies{
     implementation(libs.androidx.navigation.navigation.compose)
     implementation(libs.androidx.compose.material.material.icons.extended)
 
+    implementation(project(":libs:room"))
 
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)

@@ -15,6 +15,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import se.finne.lukas.room.RoomDatabase
+import se.finne.lukas.room.dao.UserDao
+import se.finne.lukas.room.entities.User
+import se.finne.lukas.room.entities.workouts.Bench
+import se.finne.lukas.room.entities.workouts.LatPullDown
+import se.finne.lukas.room.entities.workouts.Squat
 
 
 sealed class GzClpState{
@@ -23,9 +29,51 @@ sealed class GzClpState{
 }
 const val SIXTY = 60
 @HiltViewModel
-class GzclpViewModel @Inject constructor(): ViewModel() {
+class GzclpViewModel @Inject constructor(
+    val userDao: UserDao,
+): ViewModel() {
 
     private val _selectedLiftKey = MutableStateFlow<WorkOutTier>(WorkOutTier.T1)
+
+
+    init {
+       viewModelScope.launch {
+           userDao.insertUsers(
+               User(
+                   id = 0,
+                   username = "Lukas",
+                   currentWorkout = "A1",
+                   squatId = 0,
+                   benchId = 0,
+                   latPullDownId = 0
+               )
+           )
+            userDao.insertA1(
+                squat = Squat(
+                    id = 0  ,
+                    weight = 9,
+                    set = 5,
+                    reps = 3,
+                    userId = 0,
+                ),
+                bench = Bench(
+                    id = 0,
+                    weight = 9,
+                    set = 3,
+                    reps = 10,
+                    userId = 0,
+                ),
+                latPullDown = LatPullDown(
+                    id = 0,
+                    weight = 9,
+                    set = 3,
+                    reps = 15,
+                   userId = 0,
+                ))
+       }
+    }
+
+
 
     val uiState: StateFlow<GzClpState> = watchWorkout()
         .stateIn(
