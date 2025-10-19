@@ -15,7 +15,7 @@ import se.finne.lukas.room.entities.workouts.Squat
         Squat::class,
         LatPullDown::class
     ],
-    version = 3,
+    version = 5,
 )
 abstract class RoomDatabase : RoomDatabase(){
     abstract val dao: UserDao

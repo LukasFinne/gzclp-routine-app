@@ -8,8 +8,8 @@ import se.finne.lukas.room.entities.workouts.LatPullDown
 data class UserAndLatPullDown(
     @Embedded val user: User,
     @Relation(
-       parentColumn = "id",
-       entityColumn = "userId"
+       parentColumn = "latPullDownId",
+       entityColumn = "id"
     )
     val latPullDown: LatPullDown
 )

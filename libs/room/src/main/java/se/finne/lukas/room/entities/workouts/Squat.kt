@@ -10,6 +10,5 @@ data class Squat(
     val weight: Int,
     val reps: Int,
     val set: Int,
-    val userId: Int,
 )
 

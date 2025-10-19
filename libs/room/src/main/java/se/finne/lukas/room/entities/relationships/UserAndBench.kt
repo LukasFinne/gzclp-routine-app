@@ -8,8 +8,8 @@ import se.finne.lukas.room.entities.workouts.Bench
 data class UserAndBench(
     @Embedded val user: User,
     @Relation(
-        parentColumn = "id",
-        entityColumn = "userId"
+        parentColumn = "benchId",
+        entityColumn = "id"
     )
     val bench: Bench
 )

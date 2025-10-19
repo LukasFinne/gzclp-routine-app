@@ -11,6 +11,5 @@ data class Bench(
     val weight: Int,
     val reps: Int,
     val set: Int,
-    val userId: Int,
 )
 

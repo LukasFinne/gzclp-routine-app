@@ -17,7 +17,7 @@ import se.finne.lukas.room.entities.workouts.Squat
 
 @Dao
 interface UserDao {
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUsers(users: User)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -32,13 +32,13 @@ interface UserDao {
 
    @Transaction
    @Query("SELECT * FROM User")
-    fun getUsersAndSquat(): Flow<List<UserAndSquat>>
+    fun getUsersAndSquat(): Flow<UserAndSquat>
 
     @Transaction
     @Query("SELECT * FROM User")
-    fun getUsersAndBench(): Flow<List<UserAndBench>>
+    fun getUsersAndBench(): Flow<UserAndBench>
 
     @Transaction
     @Query("SELECT * FROM User")
-    fun getUsersAndLatPullDown(): Flow<List<UserAndLatPullDown>>
+    fun getUsersAndLatPullDown(): Flow<UserAndLatPullDown>
 }

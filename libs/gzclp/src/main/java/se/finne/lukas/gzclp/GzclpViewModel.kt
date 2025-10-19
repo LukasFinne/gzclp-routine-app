@@ -1,9 +1,11 @@
 package se.finne.lukas.gzclp
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -18,9 +21,11 @@ import kotlinx.coroutines.launch
 import se.finne.lukas.room.RoomDatabase
 import se.finne.lukas.room.dao.UserDao
 import se.finne.lukas.room.entities.User
+import se.finne.lukas.room.entities.relationships.UserAndSquat
 import se.finne.lukas.room.entities.workouts.Bench
 import se.finne.lukas.room.entities.workouts.LatPullDown
 import se.finne.lukas.room.entities.workouts.Squat
+import kotlin.text.get
 
 
 sealed class GzClpState{
@@ -54,22 +59,20 @@ class GzclpViewModel @Inject constructor(
                     weight = 9,
                     set = 5,
                     reps = 3,
-                    userId = 0,
                 ),
                 bench = Bench(
                     id = 0,
                     weight = 9,
                     set = 3,
                     reps = 10,
-                    userId = 0,
                 ),
                 latPullDown = LatPullDown(
                     id = 0,
                     weight = 9,
                     set = 3,
                     reps = 15,
-                   userId = 0,
-                ))
+                )
+            )
        }
     }
 
@@ -127,52 +130,60 @@ class GzclpViewModel @Inject constructor(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun watchWorkout(): Flow<GzClpState> =
-        getWorkOut(Workouts.A1.id).combine(_selectedLiftKey) { workout, liftKey ->
-            GzClpState.Loaded(workout.name, workout.lifts[liftKey])
+        userDao.getUsersById(1).flatMapLatest {
+            getWorkOut(it.currentWorkout).combine(_selectedLiftKey) { workout, liftKey ->
+                GzClpState.Loaded(workout.name, workout.lifts[liftKey])
+            }
         }
 
 
-    fun getWorkOut(id : String): Flow<Workout> = flowOf(
-        when(Workouts.valueOf(id)){
-            Workouts.A1 ->
-                Workout(
-                    name = "Squat day",
-                    lifts = mapOf(
-                        WorkOutTier.T1 to
-                                Lift(
-                                    name = "Squat",
-                                    sets = T1Lifts.FiveThree.set,
-                                    reps = T1Lifts.FiveThree.rep,
-                                    nextWorkout = WorkOutTier.T2,
-                                    weight = 10,
-                                    restTime = 3
-                                ),
-                        WorkOutTier.T2 to
-                                Lift(
-                                    name = "Bench",
-                                    sets = T2Lifts.ThreeTen.set,
-                                    reps = T2Lifts.ThreeTen.rep,
-                                    nextWorkout = WorkOutTier.T3,
-                                    weight = 10,
-                                    restTime = 2
-                                ),
-                        WorkOutTier.T3 to
-                                Lift(
-                                    name = "LatPullDown",
-                                    sets = T3Lifts.ThreeFifteen.set,
-                                    reps = T3Lifts.ThreeFifteen.rep,
-                                    nextWorkout = WorkOutTier.T1,
-                                    weight = 6,
-                                    restTime = 1
-                                )
-                    )
-                    ,
-                )
-            else -> Workout(
-                "else",
-                lifts = mapOf()
+    fun getA1Workout() = combine(
+        userDao.getUsersAndSquat(),
+        userDao.getUsersAndBench(),
+        userDao.getUsersAndLatPullDown()
+    ){
+        squat, bench, latPullDown ->
+        Workout(
+            name = "Squat day",
+            mapOf(
+                WorkOutTier.T1 to
+                        Lift(
+                            name = "Squat",
+                            sets = squat.squat.set,
+                            reps = squat.squat.reps,
+                            nextWorkout = WorkOutTier.T2,
+                            weight = squat.squat.weight,
+                            restTime = 3
+                        ),
+                WorkOutTier.T2 to
+                        Lift(
+                            name = "Bench",
+                            sets = bench.bench.set,
+                            reps = bench.bench.reps,
+                            nextWorkout = WorkOutTier.T3,
+                            weight = bench.bench.weight,
+                            restTime = 2
+                        ),
+                WorkOutTier.T3 to
+                        Lift(
+                            name = "LatPullDown",
+                            sets = latPullDown.latPullDown.set,
+                            reps = latPullDown.latPullDown.reps,
+                            nextWorkout = WorkOutTier.T1,
+                            weight = latPullDown.latPullDown.weight,
+                            restTime = 1
+                        )
             )
-        }
-    )
+        )
+    }
+
+    fun getWorkOut(id : String): Flow<Workout> = when(Workouts.valueOf(id)) {
+        Workouts.A1 -> getA1Workout()
+        else -> flowOf(Workout(
+            name = "else",
+            mapOf()
+        ))
+    }
 }

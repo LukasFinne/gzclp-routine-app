@@ -8,8 +8,8 @@ import se.finne.lukas.room.entities.workouts.Squat
 data class UserAndSquat(
     @Embedded val user: User,
     @Relation(
-        parentColumn = "id",
-        entityColumn = "userId"
+        parentColumn = "squatId",
+        entityColumn = "id"
     )
     val squat: Squat,
 )
