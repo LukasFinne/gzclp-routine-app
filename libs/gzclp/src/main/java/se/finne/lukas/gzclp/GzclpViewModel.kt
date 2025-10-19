@@ -40,44 +40,6 @@ class GzclpViewModel @Inject constructor(
 
     private val _selectedLiftKey = MutableStateFlow<WorkOutTier>(WorkOutTier.T1)
 
-
-    init {
-       viewModelScope.launch {
-           userDao.insertUsers(
-               User(
-                   id = 0,
-                   username = "Lukas",
-                   currentWorkout = "A1",
-                   squatId = 0,
-                   benchId = 0,
-                   latPullDownId = 0
-               )
-           )
-            userDao.insertA1(
-                squat = Squat(
-                    id = 0  ,
-                    weight = 9,
-                    set = 5,
-                    reps = 3,
-                ),
-                bench = Bench(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 10,
-                ),
-                latPullDown = LatPullDown(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 15,
-                )
-            )
-       }
-    }
-
-
-
     val uiState: StateFlow<GzClpState> = watchWorkout()
         .stateIn(
             scope = viewModelScope,
