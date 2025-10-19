@@ -5,55 +5,40 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import se.finne.lukas.gzclp.GzClpState.*
-import java.util.Locale
-import kotlin.math.min
-
-
-// Beöver komma ihåg nurvarande
-// A1 -> B1 -> A2 -> B2
-
-enum class T1Lifts(val set: Int, val rep: Int) {
-    FiveThree(5, 3), SixTwo(6,2), TenOne(10,1)
-}
-
-enum class T2Lifts(val set: Int, val rep: Int) {
-    ThreeTen(3,10), ThreeEight(3,8), ThreeSix(3,6)
-}
-
-enum class T3Lifts(val set: Int, val rep: Int) {
-    ThreeFifteen(3,15)
-}
-
-enum class Workouts(val id: String){
-    A1("A1"), A2("A2"), B1("B1"),B2("B2")
-}
+import se.finne.lukas.room.RoomDatabase
+import se.finne.lukas.room.dao.UserDao
+import se.finne.lukas.room.entities.User
+import se.finne.lukas.room.entities.relationships.UserAndSquat
+import se.finne.lukas.room.entities.workouts.Bench
+import se.finne.lukas.room.entities.workouts.LatPullDown
+import se.finne.lukas.room.entities.workouts.Squat
+import kotlin.text.get
 
 
 sealed class GzClpState{
     data object Loading: GzClpState()
     data class Loaded(val name: String, val lift: Lift?): GzClpState()
 }
-
-
+const val SIXTY = 60
 @HiltViewModel
-class GzclpViewModel @Inject constructor(): ViewModel() {
+class GzclpViewModel @Inject constructor(
+    val userDao: UserDao,
+): ViewModel() {
 
-    private val selectedLiftKey = MutableStateFlow("T1")
+    private val _selectedLiftKey = MutableStateFlow<WorkOutTier>(WorkOutTier.T1)
 
     val uiState: StateFlow<GzClpState> = watchWorkout()
         .stateIn(
@@ -74,6 +59,7 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
             _timerValue.update {
                  seconds
             }
+
             while (seconds > 0) {
                 delay(1000)
                 seconds--
@@ -97,58 +83,69 @@ class GzclpViewModel @Inject constructor(): ViewModel() {
         }
     }
 
-    fun onLiftSelected(liftKey: String) {
-        selectedLiftKey.update { liftKey }
-        _currentSet.update { 0 }
+    fun onLiftSelected(liftKey: WorkOutTier) {
+        if(liftKey != WorkOutTier.T3){
+            _selectedLiftKey.update { liftKey }
+            _currentSet.update { 0 }
+        }else {
+            //Start next Workout
+        }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun watchWorkout(): Flow<GzClpState> =
-        getWorkOut(Workouts.A1.id).combine(selectedLiftKey) { workout, liftKey ->
-            GzClpState.Loaded(workout.name, workout.lifts[liftKey])
+        userDao.getUsersById(1).flatMapLatest {
+            getWorkOut(it.currentWorkout).combine(_selectedLiftKey) { workout, liftKey ->
+                GzClpState.Loaded(workout.name, workout.lifts[liftKey])
+            }
         }
 
 
-    fun getWorkOut(id : String): Flow<Workout> = flowOf(
-        when(Workouts.valueOf(id)){
-            Workouts.A1 ->
-                Workout(
-                    name = "Squat day",
-                    lifts = mapOf(
-                        "T1" to
-                                Lift(
-                                    name = "Squat",
-                                    sets = T1Lifts.FiveThree.set,
-                                    reps = T1Lifts.FiveThree.rep,
-                                    nextWorkout = "T2",
-                                    weight = 10,
-                                    restTime = 3
-                                ),
-                        "T2" to
-
-                                Lift(
-                                    name = "Bench",
-                                    sets = T2Lifts.ThreeTen.set,
-                                    reps = T2Lifts.ThreeTen.rep,
-                                    nextWorkout = "T3",
-                                    weight = 10,
-                                    restTime = 2
-                                ),
-                        "T3" to
-                                Lift(
-                                    name = "LatPullDown",
-                                    sets = T3Lifts.ThreeFifteen.set,
-                                    reps = T3Lifts.ThreeFifteen.rep,
-                                    nextWorkout = "T1",
-                                    weight = 6,
-                                    restTime = 1
-                                )
-                    )
-                    ,
-                )
-            else -> Workout(
-                "else",
-                lifts = mapOf()
+    fun getA1Workout() = combine(
+        userDao.getUsersAndSquat(),
+        userDao.getUsersAndBench(),
+        userDao.getUsersAndLatPullDown()
+    ){
+        squat, bench, latPullDown ->
+        Workout(
+            name = "Squat day",
+            mapOf(
+                WorkOutTier.T1 to
+                        Lift(
+                            name = "Squat",
+                            sets = squat.squat.set,
+                            reps = squat.squat.reps,
+                            nextWorkout = WorkOutTier.T2,
+                            weight = squat.squat.weight,
+                            restTime = 3
+                        ),
+                WorkOutTier.T2 to
+                        Lift(
+                            name = "Bench",
+                            sets = bench.bench.set,
+                            reps = bench.bench.reps,
+                            nextWorkout = WorkOutTier.T3,
+                            weight = bench.bench.weight,
+                            restTime = 2
+                        ),
+                WorkOutTier.T3 to
+                        Lift(
+                            name = "LatPullDown",
+                            sets = latPullDown.latPullDown.set,
+                            reps = latPullDown.latPullDown.reps,
+                            nextWorkout = WorkOutTier.T1,
+                            weight = latPullDown.latPullDown.weight,
+                            restTime = 1
+                        )
             )
-        }
-    )
+        )
+    }
+
+    fun getWorkOut(id : String): Flow<Workout> = when(Workouts.valueOf(id)) {
+        Workouts.A1 -> getA1Workout()
+        else -> flowOf(Workout(
+            name = "else",
+            mapOf()
+        ))
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeCompilerApi
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
                         Buttons(timerValue) {
                             if(currentSet != data.lift.sets){
+                                viewModel.startTimer(data.lift.restTime)
                                 viewModel.updateCurrentSet(data.lift.sets)
                             }else{
                                 viewModel.onLiftSelected(data.lift.nextWorkout)
