@@ -9,7 +9,4 @@ data class User(
     val id: Int = 0,
     val username: String,
     val currentWorkout: String,
-    val squatId: Int,
-    val benchId: Int,
-    val latPullDownId: Int,
 )
