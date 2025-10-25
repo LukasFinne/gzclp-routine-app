@@ -11,11 +11,11 @@ data class Lift(
     val reps: Int,
     val restTime: Int,
     val weight: Int,
-    val nextWorkout: WorkOutTier,
+    val onNext: WorkOutTier,
 )
 
 enum class WorkOutTier{
-    T1, T2, T3
+    T1, T2, T3,Finished
 }
 enum class T1Lifts(val set: Int, val rep: Int) {
     FiveThree(5, 3), SixTwo(6,2), TenOne(10,1)

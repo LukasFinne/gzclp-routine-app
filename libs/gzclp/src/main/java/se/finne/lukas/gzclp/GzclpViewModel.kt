@@ -1,6 +1,5 @@
 package se.finne.lukas.gzclp
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,14 +17,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import se.finne.lukas.room.RoomDatabase
 import se.finne.lukas.room.dao.UserDao
-import se.finne.lukas.room.entities.User
-import se.finne.lukas.room.entities.relationships.UserAndSquat
-import se.finne.lukas.room.entities.workouts.Bench
-import se.finne.lukas.room.entities.workouts.LatPullDown
-import se.finne.lukas.room.entities.workouts.Squat
-import kotlin.text.get
 
 
 sealed class GzClpState{
@@ -84,12 +76,8 @@ class GzclpViewModel @Inject constructor(
     }
 
     fun onLiftSelected(liftKey: WorkOutTier) {
-        if(liftKey != WorkOutTier.T3){
             _selectedLiftKey.update { liftKey }
             _currentSet.update { 0 }
-        }else {
-            //Start next Workout
-        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -115,7 +103,7 @@ class GzclpViewModel @Inject constructor(
                             name = "Squat",
                             sets = squat.squat.set,
                             reps = squat.squat.reps,
-                            nextWorkout = WorkOutTier.T2,
+                            onNext = WorkOutTier.T2,
                             weight = squat.squat.weight,
                             restTime = 3
                         ),
@@ -124,7 +112,7 @@ class GzclpViewModel @Inject constructor(
                             name = "Bench",
                             sets = bench.bench.set,
                             reps = bench.bench.reps,
-                            nextWorkout = WorkOutTier.T3,
+                            onNext = WorkOutTier.T3,
                             weight = bench.bench.weight,
                             restTime = 2
                         ),
@@ -133,7 +121,7 @@ class GzclpViewModel @Inject constructor(
                             name = "LatPullDown",
                             sets = latPullDown.latPullDown.set,
                             reps = latPullDown.latPullDown.reps,
-                            nextWorkout = WorkOutTier.T1,
+                            onNext = WorkOutTier.Finished,
                             weight = latPullDown.latPullDown.weight,
                             restTime = 1
                         )
