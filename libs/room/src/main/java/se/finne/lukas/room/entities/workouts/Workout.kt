@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Workout(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val workoutName: String,
     val weight: Int,
     val tierOneSet: Int,

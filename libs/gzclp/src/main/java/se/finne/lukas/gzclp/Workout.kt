@@ -1,6 +1,8 @@
 package se.finne.lukas.gzclp
 
-data class Workout (
+import se.finne.lukas.room.entities.workouts.Workout
+
+data class WorkoutUI (
     val name: String,
     val lifts: Map<WorkOutTier,Lift>
     )

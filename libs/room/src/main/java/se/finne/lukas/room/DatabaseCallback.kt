@@ -16,18 +16,17 @@ class DatabaseCallback(
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
         CoroutineScope(Dispatchers.IO).launch {
-            userDao.get().insertUsers(
+            val userId = userDao.get().insertUsers(
                 User(
-                    id = 0,
                     username = "Lukas",
                     currentWorkout = "A1",
                 )
             )
+
             userDao.get().insertWorkout(
                 Workout(
-                    id = 0,
                     workoutName = "Squat",
-                    userCreatorId = 0,
+                    userCreatorId = userId.toInt(),
                     weight = 20,
                     tierOneRep = 3,
                     tierOneSet = 5,
@@ -38,9 +37,8 @@ class DatabaseCallback(
 
             userDao.get().insertWorkout(
                 Workout(
-                    id = 1,
                     workoutName = "Bench",
-                    userCreatorId = 0,
+                    userCreatorId = userId.toInt(),
                     weight = 20,
                     tierOneRep = 3,
                     tierOneSet = 5,
@@ -51,9 +49,8 @@ class DatabaseCallback(
 
             userDao.get().insertWorkout(
                 Workout(
-                    id = 2,
                     workoutName = "LatPullDown",
-                    userCreatorId = 0,
+                    userCreatorId = userId.toInt(),
                     weight = 20,
                     tierOneRep = 3,
                     tierOneSet = 15,

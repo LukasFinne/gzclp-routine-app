@@ -26,9 +26,9 @@ object RoomModule {
     fun provideRoomDatabase(
         @ApplicationContext context: Context,
         callback: DatabaseCallback
-    ): RoomDatabase = Room.databaseBuilder(
+    ): AppDatabase = Room.databaseBuilder(
         context,
-        RoomDatabase::class.java,
+        AppDatabase::class.java,
         "se.finne.lukas.room"
     ).fallbackToDestructiveMigration(true)
         .addCallback(callback)
@@ -37,7 +37,7 @@ object RoomModule {
     @Provides
     @Singleton
     fun provideUserDao(
-        roomDatabase: RoomDatabase
-    ): UserDao = roomDatabase.dao
+        appDatabase: AppDatabase
+    ): UserDao = appDatabase.userDao()
 
 }

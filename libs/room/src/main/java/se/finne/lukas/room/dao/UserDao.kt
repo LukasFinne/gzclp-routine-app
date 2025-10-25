@@ -14,11 +14,11 @@ import se.finne.lukas.room.entities.workouts.Workout
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertUsers(users: User)
+    suspend fun insertUsers(users: User): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWorkout(
-       workout: Workout
+        workout: Workout
     )
 
    @Query("SELECT * FROM User WHERE id = :id")
@@ -26,6 +26,8 @@ interface UserDao {
 
     @Transaction
     @Query("SELECT * FROM User")
-    fun getUsersWithWorkouts(): Flow<List<UserAndWorkout>>
+    fun getUsersWithWorkouts():Flow<List<UserAndWorkout>>
 
-}
+    @Query("SELECT * FROM Workout WHERE workoutName = :name AND userCreatorId = :userCreatorId LIMIT 1")
+    fun getWorkoutByNameAndUserId(name: String, userCreatorId: Int): Flow<Workout>
+ }

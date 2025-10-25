@@ -10,5 +10,5 @@ data class UserAndWorkout(
         parentColumn = "id",
         entityColumn = "userCreatorId"
     )
-    val workout: Workout
+    val workout: List<Workout>
 )
