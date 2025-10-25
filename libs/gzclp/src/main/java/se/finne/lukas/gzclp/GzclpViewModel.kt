@@ -1,5 +1,6 @@
 package se.finne.lukas.gzclp
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +46,16 @@ class GzclpViewModel @Inject constructor(
     private val _currentSet = MutableStateFlow<Int>(0)
     val currentSet = _currentSet.asStateFlow()
 
+
+    init {
+        viewModelScope.launch {
+
+            userDao.getUsersWithWorkouts().collect {
+                Log.d("user", it.toString())
+            }
+        }
+    }
+
     fun startTimer(minutes: Int) {
         viewModelScope.launch {
             var seconds = minutes
@@ -65,6 +76,44 @@ class GzclpViewModel @Inject constructor(
         }
     }
 
+    fun updateWorkout(restTime: Int, isSuccess: Boolean, workoutSet: Int, workoutId: Int, next: WorkOutTier){
+
+        viewModelScope.launch {
+            uiState.collect {
+                if(it is GzClpState.Loaded){
+                    val lift = it.lift
+                    if(lift != null){
+
+                    }
+                }
+            }
+        }
+
+        if(isSuccess){
+            startTimer(restTime)
+            updateCurrentSet(workoutSet)
+        }else{
+            startTimer(restTime)
+            onLiftSelected(next)
+        }
+    }
+
+    fun increateWeight(tier: WorkOutTier){
+       when(tier){
+           WorkOutTier.T1 -> {
+
+           }
+           WorkOutTier.T2 -> {
+
+           }
+           WorkOutTier.T3 -> {
+
+           }
+           else -> {}
+       }
+    }
+
+
     fun updateCurrentSet(liftSet: Int){
         _currentSet.update {
             if(it == liftSet){
@@ -74,66 +123,63 @@ class GzclpViewModel @Inject constructor(
             }
         }
     }
-
     fun onLiftSelected(liftKey: WorkOutTier) {
             _selectedLiftKey.update { liftKey }
             _currentSet.update { 0 }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun watchWorkout(): Flow<GzClpState> =
-        userDao.getUsersById(1).flatMapLatest {
-            getWorkOut(it.currentWorkout).combine(_selectedLiftKey) { workout, liftKey ->
-                GzClpState.Loaded(workout.name, workout.lifts[liftKey])
-            }
-        }
+    private fun watchWorkout(): Flow<GzClpState> = flowOf(GzClpState.Loading)
 
 
-    fun getA1Workout() = combine(
-        userDao.getUsersAndSquat(),
-        userDao.getUsersAndBench(),
-        userDao.getUsersAndLatPullDown()
-    ){
-        squat, bench, latPullDown ->
-        Workout(
-            name = "Squat day",
-            mapOf(
-                WorkOutTier.T1 to
-                        Lift(
-                            name = "Squat",
-                            sets = squat.squat.set,
-                            reps = squat.squat.reps,
-                            onNext = WorkOutTier.T2,
-                            weight = squat.squat.weight,
-                            restTime = 3
-                        ),
-                WorkOutTier.T2 to
-                        Lift(
-                            name = "Bench",
-                            sets = bench.bench.set,
-                            reps = bench.bench.reps,
-                            onNext = WorkOutTier.T3,
-                            weight = bench.bench.weight,
-                            restTime = 2
-                        ),
-                WorkOutTier.T3 to
-                        Lift(
-                            name = "LatPullDown",
-                            sets = latPullDown.latPullDown.set,
-                            reps = latPullDown.latPullDown.reps,
-                            onNext = WorkOutTier.Finished,
-                            weight = latPullDown.latPullDown.weight,
-                            restTime = 1
-                        )
-            )
-        )
-    }
-
-    fun getWorkOut(id : String): Flow<Workout> = when(Workouts.valueOf(id)) {
-        Workouts.A1 -> getA1Workout()
-        else -> flowOf(Workout(
-            name = "else",
-            mapOf()
-        ))
-    }
+//    fun getA1Workout() = combine(
+//        userDao.getUsersAndSquat(),
+//        userDao.getUsersAndBench(),
+//        userDao.getUsersAndLatPullDown()
+//    ){
+//        squat, bench, latPullDown ->
+//        Workout(
+//            name = "Squat day",
+//            mapOf(
+//                WorkOutTier.T1 to
+//                        Lift(
+//                            id = squat.squat.id,
+//                            name = "Squat",
+//                            sets = squat.squat.set,
+//                            reps = squat.squat.reps,
+//                            onNext = WorkOutTier.T2,
+//                            weight = squat.squat.weight,
+//                            restTime = 3
+//                        ),
+//                WorkOutTier.T2 to
+//                        Lift(
+//                            id = bench.bench.id,
+//                            name = "Bench",
+//                            sets = bench.bench.set,
+//                            reps = bench.bench.reps,
+//                            onNext = WorkOutTier.T3,
+//                            weight = bench.bench.weight,
+//                            restTime = 2
+//                        ),
+//                WorkOutTier.T3 to
+//                        Lift(
+//                            id = latPullDown.latPullDown.id,
+//                            name = "LatPullDown",
+//                            sets = latPullDown.latPullDown.set,
+//                            reps = latPullDown.latPullDown.reps,
+//                            onNext = WorkOutTier.Finished,
+//                            weight = latPullDown.latPullDown.weight,
+//                            restTime = 1
+//                        )
+//            )
+//        )
+//    }
+//
+//    fun getWorkOut(id : String): Flow<Workout> = when(Workouts.valueOf(id)) {
+//        Workouts.A1 -> getA1Workout()
+//        else -> flowOf(Workout(
+//            name = "else",
+//            mapOf()
+//        ))
+//    }
 }

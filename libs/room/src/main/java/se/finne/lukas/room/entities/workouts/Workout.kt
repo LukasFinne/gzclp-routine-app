@@ -5,12 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Workout(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val name: String,
+    @PrimaryKey(autoGenerate = true) val id: Int?,
+    val workoutName: String,
     val weight: Int,
     val tierOneSet: Int,
     val tierOneRep: Int,
     val tierTwoSet: Int,
     val tierTwoRep: Int,
-    val userId: Int
+    val userCreatorId: Int,
 )

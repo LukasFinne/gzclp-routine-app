@@ -6,13 +6,7 @@ import se.finne.lukas.room.dao.UserDao
 import se.finne.lukas.room.entities.User
 import se.finne.lukas.room.entities.workouts.Workout
 
-@Database(
-    entities = [
-        User::class,
-        Workout::class,
-    ],
-    version = 8,
-)
-abstract class RoomDatabase : RoomDatabase(){
-    abstract val dao: UserDao
+@Database(entities = [User::class, Workout::class], version = 1)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun userDao(): UserDao
 }

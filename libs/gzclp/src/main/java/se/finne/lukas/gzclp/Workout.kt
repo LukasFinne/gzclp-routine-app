@@ -6,6 +6,7 @@ data class Workout (
     )
 
 data class Lift(
+    val id: Int,
     val name: String,
     val sets: Int,
     val reps: Int,

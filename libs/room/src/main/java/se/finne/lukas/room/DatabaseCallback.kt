@@ -7,9 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import se.finne.lukas.room.dao.UserDao
 import se.finne.lukas.room.entities.User
-import se.finne.lukas.room.entities.workouts.Bench
-import se.finne.lukas.room.entities.workouts.LatPullDown
-import se.finne.lukas.room.entities.workouts.Squat
+import se.finne.lukas.room.entities.workouts.Workout
 import javax.inject.Provider
 
 class DatabaseCallback(
@@ -23,30 +21,45 @@ class DatabaseCallback(
                     id = 0,
                     username = "Lukas",
                     currentWorkout = "A1",
-                    squatId = 0,
-                    benchId = 0,
-                    latPullDownId = 0
                 )
             )
-            userDao.get().insertA1(
-                squat = Squat(
+            userDao.get().insertWorkout(
+                Workout(
                     id = 0,
-                    weight = 9,
-                    set = 5,
-                    reps = 3,
+                    workoutName = "Squat",
+                    userCreatorId = 0,
+                    weight = 20,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
                 ),
-                bench = Bench(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 10,
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    id = 1,
+                    workoutName = "Bench",
+                    userCreatorId = 0,
+                    weight = 20,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
                 ),
-                latPullDown = LatPullDown(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 15,
-                )
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    id = 2,
+                    workoutName = "LatPullDown",
+                    userCreatorId = 0,
+                    weight = 20,
+                    tierOneRep = 3,
+                    tierOneSet = 15,
+                    tierTwoSet = 3,
+                    tierTwoRep = 15,
+                ),
             )
         }
     }

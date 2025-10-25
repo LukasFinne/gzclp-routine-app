@@ -38,8 +38,14 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier, onFini
                     if(data.lift !=null){
                         ListItem(data.lift,currentSet, timerValue)
 
-                        Buttons(timerValue) {
-                            onFinished()
+                        Buttons(timerValue) { isSuccess ->
+
+                            if(data.lift.onNext == WorkOutTier.Finished){
+                                onFinished()
+                            }else{
+                                data.name
+                                viewModel.updateWorkout(data.lift.restTime, isSuccess, data.lift.sets, workoutId = data.lift.id,data.lift.onNext)
+                            }
                         }
                     }
 
@@ -90,20 +96,20 @@ fun ListItem(lift: Lift,currentSet: Int, timerValue: Int?, modifier: Modifier = 
 
 }
 @Composable
-fun Buttons(timerValue: Int?, modifier: Modifier = Modifier, onClick:(Int) -> Unit){
+fun Buttons(timerValue: Int?, modifier: Modifier = Modifier, onClick:(Boolean) -> Unit){
 
     Row( modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
         Button(
             enabled = timerValue == null,
             onClick ={
-
+                onClick(false)
             }) {
             Text("Failed")
         }
         Button(
             enabled = timerValue == null,
             onClick ={
-                onClick(0,)
+                onClick(true)
             }) {
             Text("Success")
         }
