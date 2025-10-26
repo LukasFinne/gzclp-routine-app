@@ -78,41 +78,36 @@ class GzclpViewModel @Inject constructor(
         }
     }
 
-    fun updateWorkout(restTime: Int, isSuccess: Boolean, workoutSet: Int, workoutId: Int, next: WorkOutTier){
-
+    fun updateWorkout( isSuccess: Boolean,currentSet: Int, lift: Lift){
         viewModelScope.launch {
-            uiState.collect {
-                if(it is GzClpState.Loaded){
-                    val lift = it.lift
-                    if(lift != null){
+            when {
+                isSuccess && currentSet == lift.sets -> {
+                    startTimer(lift.restTime)
+                    increaseWeight(lift)
+                    onLiftSelected(lift.onNext)
+                }
 
-                    }
+                isSuccess -> {
+                    startTimer(lift.restTime)
+                    updateCurrentSet(lift.sets)
+                }
+
+                !isSuccess -> {
+                     startTimer(lift.restTime)
+                     increaseWeight(lift)
+                     onLiftSelected(lift.onNext)
                 }
             }
         }
-
-        if(isSuccess){
-            startTimer(restTime)
-            updateCurrentSet(workoutSet)
-        }else{
-            startTimer(restTime)
-            onLiftSelected(next)
-        }
     }
 
-    fun increateWeight(tier: WorkOutTier){
-       when(tier){
-           WorkOutTier.T1 -> {
-
-           }
-           WorkOutTier.T2 -> {
-
-           }
-           WorkOutTier.T3 -> {
-
-           }
-           else -> {}
-       }
+    suspend fun increaseWeight(lift: Lift){
+        val increaseWeight = if (lift.name == "Squat" || lift.name == "Deadlift") 5f else 2.5f
+        userDao.updateWorkoutWeight(
+            lift.id,
+            1,
+            (lift.weight + increaseWeight).toInt()
+        )
     }
 
 

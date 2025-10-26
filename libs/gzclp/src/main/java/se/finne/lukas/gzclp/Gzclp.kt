@@ -44,7 +44,7 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier, onFini
                                 onFinished()
                             }else{
                                 data.name
-                                viewModel.updateWorkout(data.lift.restTime, isSuccess, data.lift.sets, workoutId = data.lift.id,data.lift.onNext)
+                                viewModel.updateWorkout(isSuccess, currentSet, data.lift,)
                             }
                         }
                     }

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import se.finne.lukas.room.entities.User
 import se.finne.lukas.room.entities.relationships.UserAndWorkout
@@ -21,7 +22,14 @@ interface UserDao {
         workout: Workout
     )
 
-   @Query("SELECT * FROM User WHERE id = :id")
+    @Transaction
+    @Query("UPDATE Workout SET weight = :newWeight WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutWeight(
+        workoutId: Int,
+        userCreatorId: Int,
+        newWeight: Int
+    )
+    @Query("SELECT * FROM User WHERE id = :id")
     fun getUsersById(id: Int): Flow<User>
 
     @Transaction
