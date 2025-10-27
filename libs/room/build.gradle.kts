@@ -10,6 +10,10 @@ plugins {
 android{
     namespace = "se.finne.lukas.room"
     compileSdk = 36
+    defaultConfig {
+        minSdk = 36
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
     buildFeatures{
         compose = true
     }
@@ -32,5 +36,12 @@ dependencies{
     implementation(libs.androidx.room.room.runtime)
     ksp(libs.androidx.room.room.compiler)
     implementation(libs.androidx.room.room.ktx)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.kotlinx.kotlinx.coroutines.test)
+    androidTestImplementation("app.cash.turbine:turbine:1.2.1")
+    androidTestImplementation(kotlin("test"))
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
 }
