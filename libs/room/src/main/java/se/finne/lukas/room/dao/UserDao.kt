@@ -22,6 +22,24 @@ interface UserDao {
         workout: Workout
     )
 
+
+    @Transaction
+    @Query("UPDATE Workout SET tierTwoSet = :newSets, tierTwoRep = :newReps WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutTierTwoSetAndRep(
+        workoutId: Int,
+        userCreatorId: Int,
+        newSets: Int,
+        newReps: Int
+    )
+
+    @Transaction
+    @Query("UPDATE Workout SET tierOneSet = :newSets, tierOneRep = :newReps WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutTierOneSetAndRep(
+        workoutId: Int,
+        userCreatorId: Int,
+        newSets: Int,
+        newReps: Int
+    )
     @Transaction
     @Query("UPDATE Workout SET weight = :newWeight WHERE id = :workoutId and userCreatorId = :userCreatorId")
     suspend fun updateWorkoutWeight(

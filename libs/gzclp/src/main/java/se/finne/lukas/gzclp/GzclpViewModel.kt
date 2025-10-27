@@ -49,15 +49,6 @@ class GzclpViewModel @Inject constructor(
     private val _currentSet = MutableStateFlow<Int>(0)
     val currentSet = _currentSet.asStateFlow()
 
-
-    init {
-     viewModelScope.launch {
-         userDao.getUsersWithWorkouts().collect {
-                Log.d("GzclpViewModel", "Users with workouts: $it")
-         }
-     }
-    }
-
     fun startTimer(minutes: Int) {
         viewModelScope.launch {
             var seconds = 1
@@ -95,9 +86,33 @@ class GzclpViewModel @Inject constructor(
                 !isSuccess -> {
                      startTimer(lift.restTime)
                      increaseWeight(lift)
+                     updateSetAndRep(lift)
                      onLiftSelected(lift.onNext)
                 }
             }
+        }
+    }
+
+    suspend fun updateSetAndRep(lift: Lift){
+        when(lift.onNext){
+            WorkOutTier.T2 -> {
+                val newSetAndRep = calculateNextT1Lift(lift)
+                userDao.updateWorkoutTierOneSetAndRep(
+                    lift.id,
+                    1,
+                    newSetAndRep.set,newSetAndRep.rep
+                )
+            }
+            WorkOutTier.T3 ->{
+                val newSetAndRep = calculateNextT2Lift(lift)
+                userDao.updateWorkoutTierTwoSetAndRep(
+                    lift.id,
+                    1,
+                    newSetAndRep.set,
+                    newSetAndRep.rep
+                )
+            }
+            else -> {}
         }
     }
 
