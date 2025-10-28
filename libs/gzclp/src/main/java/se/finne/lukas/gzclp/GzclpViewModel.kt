@@ -1,6 +1,5 @@
 package se.finne.lukas.gzclp
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,14 +14,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import se.finne.lukas.declaration.WorkoutRepository
+import se.finne.lukas.declaration.entities.Lift
+import se.finne.lukas.declaration.entities.LiftType
+import se.finne.lukas.declaration.entities.WorkOutTier
+import se.finne.lukas.declaration.entities.WorkoutUI
+import se.finne.lukas.declaration.entities.Workouts
+import se.finne.lukas.declaration.entities.calculateNextT1Lift
+import se.finne.lukas.declaration.entities.calculateNextT2Lift
 import se.finne.lukas.room.dao.UserDao
-import se.finne.lukas.room.entities.User
-import se.finne.lukas.room.entities.workouts.Workout
 
 
 sealed class GzClpState{
@@ -33,7 +36,7 @@ const val SIXTY = 60
 @HiltViewModel
 class GzclpViewModel @Inject constructor(
     val userDao: UserDao,
-    private val workout: WorkoutRepository
+    private val workoutRepository: WorkoutRepository
 ): ViewModel() {
 
     private val _selectedLiftKey = MutableStateFlow<WorkOutTier>(WorkOutTier.T1)
@@ -52,7 +55,6 @@ class GzclpViewModel @Inject constructor(
     val currentSet = _currentSet.asStateFlow()
 
     fun startTimer(minutes: Int) {
-        workout.increaseWeight("")
         viewModelScope.launch {
             var seconds = 1
             _timerValue.update {
@@ -80,7 +82,7 @@ class GzclpViewModel @Inject constructor(
                     userDao.updateWorkoutWeight(
                         lift.id,
                         1,
-                        increaseWeight(lift).toInt()
+                        workoutRepository.increaseWeight(lift).toInt()
                     )
                     onLiftSelected(lift.onNext)
                 }
@@ -92,11 +94,11 @@ class GzclpViewModel @Inject constructor(
 
                 !isSuccess -> {
                      startTimer(lift.restTime)
-                     increaseWeight(lift)
+                     workoutRepository.increaseWeight(lift)
                     userDao.updateWorkoutWeight(
                         lift.id,
                         1,
-                        increaseWeight(lift).toInt()
+                        workoutRepository.increaseWeight(lift).toInt()
                     )
                      updateSetAndRep(lift)
                      onLiftSelected(lift.onNext)
@@ -127,14 +129,6 @@ class GzclpViewModel @Inject constructor(
             else -> {}
         }
     }
-
-    suspend fun increaseWeight(lift: Lift): Float{
-        val increaseWeight = if (lift.name == "Squat" || lift.name == "Deadlift") 5f else 2.5f
-
-        return increaseWeight
-    }
-
-
     fun updateCurrentSet(liftSet: Int){
         _currentSet.update {
             if(it == liftSet){
@@ -171,6 +165,8 @@ class GzclpViewModel @Inject constructor(
             mapOf(
                 WorkOutTier.T1 to Lift(
                     id = squat.id,
+                    type = LiftType.Squat,
+                    workoutTier = WorkOutTier.T1,
                     name = squat.workoutName,
                     sets = squat.tierOneSet,
                     reps = squat.tierOneRep,
@@ -180,6 +176,8 @@ class GzclpViewModel @Inject constructor(
                 ),
                 WorkOutTier.T2 to Lift(
                     id = bench.id,
+                    type = LiftType.Bench,
+                    workoutTier = WorkOutTier.T2,
                     name = bench.workoutName,
                     sets = bench.tierTwoSet,
                     reps = bench.tierTwoRep,
@@ -189,13 +187,15 @@ class GzclpViewModel @Inject constructor(
                 ),
                 WorkOutTier.T3 to Lift(
                     id = latPullDown.id,
+                    type = LiftType.LatPullDown,
+                    workoutTier = WorkOutTier.T3,
                     name = latPullDown.workoutName,
-                    sets =  latPullDown.tierOneSet,
+                    sets = latPullDown.tierOneSet,
                     reps = latPullDown.tierOneRep,
                     restTime = SIXTY,
                     weight = latPullDown.weight,
-                    onNext = WorkOutTier.Finished)
-
+                    onNext = WorkOutTier.Finished
+                )
             )
         )
     }

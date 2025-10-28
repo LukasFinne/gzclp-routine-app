@@ -1,14 +1,14 @@
-package se.finne.lukas.gzclp
-
-import se.finne.lukas.room.entities.workouts.Workout
+package se.finne.lukas.declaration.entities
 
 data class WorkoutUI (
     val name: String,
     val lifts: Map<WorkOutTier,Lift>
-    )
+)
 
 data class Lift(
     val id: Int,
+    val workoutTier: WorkOutTier,
+    val type: LiftType,
     val name: String,
     val sets: Int,
     val reps: Int,
@@ -16,6 +16,15 @@ data class Lift(
     val weight: Int,
     val onNext: WorkOutTier,
 )
+
+enum class LiftType{
+    Squat,
+    Bench,
+    Deadlift,
+    OHP,
+    DumbbellRow,
+    LatPullDown,
+}
 
 enum class WorkOutTier{
     T1, T2, T3,Finished

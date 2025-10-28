@@ -19,4 +19,6 @@ kotlin {
 dependencies{
     implementation(project(":libs:workoutrepository:declaration"))
     implementation("androidx.compose.runtime:runtime:1.9.3") // Use a specific, compatible version
+    testImplementation(libs.androidx.junit)
+    testImplementation(kotlin("test"))
 }

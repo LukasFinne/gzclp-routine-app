@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import se.finne.lukas.declaration.entities.Lift
+import se.finne.lukas.declaration.entities.WorkOutTier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +66,7 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier, onFini
 
 
 @Composable
-fun ListItem(lift: Lift,currentSet: Int, timerValue: Int?, modifier: Modifier = Modifier){
+fun ListItem(lift: Lift, currentSet: Int, timerValue: Int?, modifier: Modifier = Modifier){
 
     Column(modifier = modifier) {
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
