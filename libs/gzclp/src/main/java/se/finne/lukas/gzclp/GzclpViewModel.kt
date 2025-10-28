@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import se.finne.lukas.declaration.WorkoutRepository
 import se.finne.lukas.room.dao.UserDao
 import se.finne.lukas.room.entities.User
 import se.finne.lukas.room.entities.workouts.Workout
@@ -32,6 +33,7 @@ const val SIXTY = 60
 @HiltViewModel
 class GzclpViewModel @Inject constructor(
     val userDao: UserDao,
+    private val workout: WorkoutRepository
 ): ViewModel() {
 
     private val _selectedLiftKey = MutableStateFlow<WorkOutTier>(WorkOutTier.T1)
@@ -50,6 +52,7 @@ class GzclpViewModel @Inject constructor(
     val currentSet = _currentSet.asStateFlow()
 
     fun startTimer(minutes: Int) {
+        workout.increaseWeight("")
         viewModelScope.launch {
             var seconds = 1
             _timerValue.update {
@@ -74,7 +77,11 @@ class GzclpViewModel @Inject constructor(
             when {
                 isSuccess && currentSet == lift.sets -> {
                     startTimer(lift.restTime)
-                    increaseWeight(lift)
+                    userDao.updateWorkoutWeight(
+                        lift.id,
+                        1,
+                        increaseWeight(lift).toInt()
+                    )
                     onLiftSelected(lift.onNext)
                 }
 
@@ -86,6 +93,11 @@ class GzclpViewModel @Inject constructor(
                 !isSuccess -> {
                      startTimer(lift.restTime)
                      increaseWeight(lift)
+                    userDao.updateWorkoutWeight(
+                        lift.id,
+                        1,
+                        increaseWeight(lift).toInt()
+                    )
                      updateSetAndRep(lift)
                      onLiftSelected(lift.onNext)
                 }
@@ -116,13 +128,10 @@ class GzclpViewModel @Inject constructor(
         }
     }
 
-    suspend fun increaseWeight(lift: Lift){
+    suspend fun increaseWeight(lift: Lift): Float{
         val increaseWeight = if (lift.name == "Squat" || lift.name == "Deadlift") 5f else 2.5f
-        userDao.updateWorkoutWeight(
-            lift.id,
-            1,
-            (lift.weight + increaseWeight).toInt()
-        )
+
+        return increaseWeight
     }
 
 

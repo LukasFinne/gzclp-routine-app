@@ -9,6 +9,9 @@ plugins {
 android{
     namespace = "se.finne.lukas.gzclp"
     compileSdk = 36
+    defaultConfig {
+        minSdk = 36
+    }
 }
 
 kotlin {
@@ -28,6 +31,8 @@ dependencies{
     implementation(libs.androidx.compose.material.material.icons.extended)
 
     implementation(project(":libs:room"))
+    implementation(project(":libs:workoutrepository:declaration"))
+    implementation(project(":libs:workoutrepository:wiring"))
 
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
