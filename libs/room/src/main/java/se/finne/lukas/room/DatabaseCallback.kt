@@ -27,7 +27,7 @@ class DatabaseCallback(
                 Workout(
                     workoutName = "Squat",
                     userCreatorId = userId.toInt(),
-                    weight = 20,
+                    weight = 20.0,
                     tierOneRep = 3,
                     tierOneSet = 5,
                     tierTwoSet = 3,
@@ -39,7 +39,7 @@ class DatabaseCallback(
                 Workout(
                     workoutName = "Bench",
                     userCreatorId = userId.toInt(),
-                    weight = 20,
+                    weight = 20.0,
                     tierOneRep = 3,
                     tierOneSet = 5,
                     tierTwoSet = 3,
@@ -51,7 +51,7 @@ class DatabaseCallback(
                 Workout(
                     workoutName = "LatPullDown",
                     userCreatorId = userId.toInt(),
-                    weight = 20,
+                    weight = 20.0,
                     tierOneRep = 15,
                     tierOneSet = 3,
                     tierTwoSet = 3,

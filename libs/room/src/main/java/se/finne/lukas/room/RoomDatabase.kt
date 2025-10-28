@@ -11,7 +11,7 @@ import se.finne.lukas.room.entities.workouts.Workout
         User::class,
         Workout::class,
     ],
-    version = 8,
+    version = 1,
 )
 abstract class RoomDatabase : RoomDatabase(){
     abstract val dao: UserDao

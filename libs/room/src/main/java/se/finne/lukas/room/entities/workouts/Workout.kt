@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Workout(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val workoutName: String,
-    val weight: Int,
+    val weight: Double,
     val tierOneSet: Int,
     val tierOneRep: Int,
     val tierTwoSet: Int,

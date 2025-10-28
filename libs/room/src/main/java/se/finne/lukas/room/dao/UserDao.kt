@@ -24,19 +24,21 @@ interface UserDao {
 
 
     @Transaction
-    @Query("UPDATE Workout SET tierTwoSet = :newSets, tierTwoRep = :newReps WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    @Query("UPDATE Workout SET tierTwoSet = :newSets, tierTwoRep = :newReps, weight = :weight WHERE id = :workoutId and userCreatorId = :userCreatorId")
     suspend fun updateWorkoutTierTwoSetAndRep(
         workoutId: Int,
         userCreatorId: Int,
+        weight: Double,
         newSets: Int,
         newReps: Int
     )
 
     @Transaction
-    @Query("UPDATE Workout SET tierOneSet = :newSets, tierOneRep = :newReps WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    @Query("UPDATE Workout SET tierOneSet = :newSets, tierOneRep = :newReps, weight = :weight WHERE id = :workoutId and userCreatorId = :userCreatorId")
     suspend fun updateWorkoutTierOneSetAndRep(
         workoutId: Int,
         userCreatorId: Int,
+        weight: Double,
         newSets: Int,
         newReps: Int
     )
@@ -45,7 +47,7 @@ interface UserDao {
     suspend fun updateWorkoutWeight(
         workoutId: Int,
         userCreatorId: Int,
-        newWeight: Int
+        newWeight: Double
     )
     @Query("SELECT * FROM User WHERE id = :id")
     fun getUsersById(id: Int): Flow<User>

@@ -23,8 +23,6 @@ import se.finne.lukas.declaration.entities.LiftType
 import se.finne.lukas.declaration.entities.WorkOutTier
 import se.finne.lukas.declaration.entities.WorkoutUI
 import se.finne.lukas.declaration.entities.Workouts
-import se.finne.lukas.declaration.entities.calculateNextT1Lift
-import se.finne.lukas.declaration.entities.calculateNextT2Lift
 import se.finne.lukas.room.dao.UserDao
 
 
@@ -78,11 +76,12 @@ class GzclpViewModel @Inject constructor(
         viewModelScope.launch {
             when {
                 isSuccess && currentSet == lift.sets -> {
+                   val newLift = workoutRepository.increaseWeight(lift)
                     startTimer(lift.restTime)
                     userDao.updateWorkoutWeight(
                         lift.id,
                         1,
-                        workoutRepository.increaseWeight(lift).toInt()
+                        newLift.weight
                     )
                     onLiftSelected(lift.onNext)
                 }
@@ -93,14 +92,18 @@ class GzclpViewModel @Inject constructor(
                 }
 
                 !isSuccess -> {
-                     startTimer(lift.restTime)
-                     workoutRepository.increaseWeight(lift)
+                    val lift = workoutRepository.increaseWeight(lift)
+
+                    startTimer(lift.restTime)
+
                     userDao.updateWorkoutWeight(
                         lift.id,
                         1,
-                        workoutRepository.increaseWeight(lift).toInt()
+                        lift.weight
                     )
-                     updateSetAndRep(lift)
+                    updateSetAndRep(
+                        workoutRepository.updateSetReps(lift)
+                    )
                      onLiftSelected(lift.onNext)
                 }
             }
@@ -108,25 +111,23 @@ class GzclpViewModel @Inject constructor(
     }
 
     suspend fun updateSetAndRep(lift: Lift){
-        when(lift.onNext){
-            WorkOutTier.T2 -> {
-                val newSetAndRep = calculateNextT1Lift(lift)
+        when(lift.workoutTier){
+            WorkOutTier.T1, WorkOutTier.T3, WorkOutTier.Finished -> {
                 userDao.updateWorkoutTierOneSetAndRep(
                     lift.id,
                     1,
-                    newSetAndRep.set,newSetAndRep.rep
+                    weight = lift.weight,
+                   lift.sets, lift.reps
                 )
             }
-            WorkOutTier.T3 ->{
-                val newSetAndRep = calculateNextT2Lift(lift)
+            WorkOutTier.T2 ->{
                 userDao.updateWorkoutTierTwoSetAndRep(
                     lift.id,
                     1,
-                    newSetAndRep.set,
-                    newSetAndRep.rep
+                    weight = lift.weight,
+                    lift.sets,lift.reps
                 )
             }
-            else -> {}
         }
     }
     fun updateCurrentSet(liftSet: Int){
