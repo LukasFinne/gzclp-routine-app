@@ -5,40 +5,57 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Upsert
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import se.finne.lukas.room.entities.User
-import se.finne.lukas.room.entities.relationships.UserAndBench
-import se.finne.lukas.room.entities.relationships.UserAndLatPullDown
-import se.finne.lukas.room.entities.relationships.UserAndSquat
-import se.finne.lukas.room.entities.workouts.Bench
-import se.finne.lukas.room.entities.workouts.LatPullDown
-import se.finne.lukas.room.entities.workouts.Squat
+import se.finne.lukas.room.entities.relationships.UserAndWorkout
+import se.finne.lukas.room.entities.workouts.Workout
+
 
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertUsers(users: User)
+    suspend fun insertUsers(users: User): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertA1(
-        squat: Squat,
-        bench: Bench,
-        latPullDown: LatPullDown
+    suspend fun insertWorkout(
+        workout: Workout
     )
 
-   @Query("SELECT * FROM User WHERE id = :id")
+
+    @Transaction
+    @Query("UPDATE Workout SET tierTwoSet = :newSets, tierTwoRep = :newReps, weight = :weight WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutTierTwoSetAndRep(
+        workoutId: Int,
+        userCreatorId: Int,
+        weight: Double,
+        newSets: Int,
+        newReps: Int
+    )
+
+    @Transaction
+    @Query("UPDATE Workout SET tierOneSet = :newSets, tierOneRep = :newReps, weight = :weight WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutTierOneSetAndRep(
+        workoutId: Int,
+        userCreatorId: Int,
+        weight: Double,
+        newSets: Int,
+        newReps: Int
+    )
+    @Transaction
+    @Query("UPDATE Workout SET weight = :newWeight WHERE id = :workoutId and userCreatorId = :userCreatorId")
+    suspend fun updateWorkoutWeight(
+        workoutId: Int,
+        userCreatorId: Int,
+        newWeight: Double
+    )
+    @Query("SELECT * FROM User WHERE id = :id")
     fun getUsersById(id: Int): Flow<User>
 
-   @Transaction
-   @Query("SELECT * FROM User")
-    fun getUsersAndSquat(): Flow<UserAndSquat>
-
     @Transaction
     @Query("SELECT * FROM User")
-    fun getUsersAndBench(): Flow<UserAndBench>
+    fun getUsersWithWorkouts():Flow<List<UserAndWorkout>>
 
-    @Transaction
-    @Query("SELECT * FROM User")
-    fun getUsersAndLatPullDown(): Flow<UserAndLatPullDown>
-}
+    @Query("SELECT * FROM Workout WHERE workoutName = :name AND userCreatorId = :userCreatorId LIMIT 1")
+    fun getWorkoutByNameAndUserId(name: String, userCreatorId: Int): Flow<Workout>
+ }

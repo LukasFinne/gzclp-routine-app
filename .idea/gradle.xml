@@ -15,6 +15,10 @@
             <option value="$PROJECT_DIR$/libs/gzclp" />
             <option value="$PROJECT_DIR$/libs/navigation" />
             <option value="$PROJECT_DIR$/libs/room" />
+            <option value="$PROJECT_DIR$/libs/workoutrepository" />
+            <option value="$PROJECT_DIR$/libs/workoutrepository/declaration" />
+            <option value="$PROJECT_DIR$/libs/workoutrepository/implementation" />
+            <option value="$PROJECT_DIR$/libs/workoutrepository/wiring" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -7,9 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import se.finne.lukas.room.dao.UserDao
 import se.finne.lukas.room.entities.User
-import se.finne.lukas.room.entities.workouts.Bench
-import se.finne.lukas.room.entities.workouts.LatPullDown
-import se.finne.lukas.room.entities.workouts.Squat
+import se.finne.lukas.room.entities.workouts.Workout
 import javax.inject.Provider
 
 class DatabaseCallback(
@@ -18,36 +16,85 @@ class DatabaseCallback(
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
         CoroutineScope(Dispatchers.IO).launch {
-            userDao.get().insertUsers(
+            val userId = userDao.get().insertUsers(
                 User(
-                    id = 0,
                     username = "Lukas",
                     currentWorkout = "A1",
-                    squatId = 0,
-                    benchId = 0,
-                    latPullDownId = 0
                 )
             )
-            userDao.get().insertA1(
-                squat = Squat(
-                    id = 0,
-                    weight = 9,
-                    set = 5,
-                    reps = 3,
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Squat",
+                    userCreatorId = userId.toInt(),
+                    weight = 20.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
                 ),
-                bench = Bench(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 10,
-                ),
-                latPullDown = LatPullDown(
-                    id = 0,
-                    weight = 9,
-                    set = 3,
-                    reps = 15,
-                )
             )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Bench",
+                    userCreatorId = userId.toInt(),
+                    weight = 20.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "LatPullDown",
+                    userCreatorId = userId.toInt(),
+                    weight = 20.0,
+                    tierOneRep = 15,
+                    tierOneSet = 3,
+                    tierTwoSet = 3,
+                    tierTwoRep = 15,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "OHP",
+                    userCreatorId = userId.toInt(),
+                    weight = 10.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Deadlift",
+                    userCreatorId = userId.toInt(),
+                    weight = 20.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Dumbbell Row",
+                    userCreatorId = userId.toInt(),
+                    weight = 10.0,
+                    tierOneRep = 3,
+                    tierOneSet = 15,
+                    tierTwoSet = 3,
+                    tierTwoRep = 15,
+                ),
+            )
+
         }
     }
 }

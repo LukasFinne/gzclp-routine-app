@@ -11,26 +11,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.util.Locale
+import se.finne.lukas.declaration.entities.Lift
+import se.finne.lukas.declaration.entities.WorkOutTier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
-
+fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier, onFinished: () ->Unit){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timerValue by viewModel.timerValue.collectAsStateWithLifecycle()
     val currentSet by viewModel.currentSet.collectAsStateWithLifecycle()
@@ -47,12 +40,13 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
                     if(data.lift !=null){
                         ListItem(data.lift,currentSet, timerValue)
 
-                        Buttons(timerValue) {
-                            if(currentSet != data.lift.sets){
-                                viewModel.startTimer(data.lift.restTime)
-                                viewModel.updateCurrentSet(data.lift.sets)
+                        Buttons(timerValue) { isSuccess ->
+
+                            if(data.lift.onNext == WorkOutTier.Finished){
+                                onFinished()
                             }else{
-                                viewModel.onLiftSelected(data.lift.nextWorkout)
+                                data.name
+                                viewModel.updateWorkout(isSuccess, currentSet, data.lift,)
                             }
                         }
                     }
@@ -72,7 +66,7 @@ fun GzclpScreen(viewModel: GzclpViewModel, modifier: Modifier = Modifier){
 
 
 @Composable
-fun ListItem(lift: Lift,currentSet: Int, timerValue: Int?, modifier: Modifier = Modifier){
+fun ListItem(lift: Lift, currentSet: Int, timerValue: Int?, modifier: Modifier = Modifier){
 
     Column(modifier = modifier) {
         Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -104,20 +98,20 @@ fun ListItem(lift: Lift,currentSet: Int, timerValue: Int?, modifier: Modifier = 
 
 }
 @Composable
-fun Buttons(timerValue: Int?, modifier: Modifier = Modifier, onClick:(Int) -> Unit){
+fun Buttons(timerValue: Int?, modifier: Modifier = Modifier, onClick:(Boolean) -> Unit){
 
     Row( modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
         Button(
             enabled = timerValue == null,
             onClick ={
-
+                onClick(false)
             }) {
             Text("Failed")
         }
         Button(
             enabled = timerValue == null,
             onClick ={
-                onClick(0,)
+                onClick(true)
             }) {
             Text("Success")
         }
