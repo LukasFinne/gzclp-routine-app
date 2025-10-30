@@ -58,6 +58,43 @@ class DatabaseCallback(
                     tierTwoRep = 15,
                 ),
             )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "OHP",
+                    userCreatorId = userId.toInt(),
+                    weight = 10.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Deadlift",
+                    userCreatorId = userId.toInt(),
+                    weight = 20.0,
+                    tierOneRep = 3,
+                    tierOneSet = 5,
+                    tierTwoSet = 3,
+                    tierTwoRep = 10,
+                ),
+            )
+
+            userDao.get().insertWorkout(
+                Workout(
+                    workoutName = "Dumbbell Row",
+                    userCreatorId = userId.toInt(),
+                    weight = 10.0,
+                    tierOneRep = 3,
+                    tierOneSet = 15,
+                    tierTwoSet = 3,
+                    tierTwoRep = 15,
+                ),
+            )
+
         }
     }
 }

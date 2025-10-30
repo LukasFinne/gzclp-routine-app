@@ -203,6 +203,8 @@ class GzclpViewModel @Inject constructor(
 
     fun getWorkOut(id : String, userId: Int): Flow<WorkoutUI> = when(Workouts.valueOf(id)) {
         Workouts.A1 -> getA1Workout(userId)
-        else -> flowOf()
+        Workouts.A2 ->flowOf()
+        Workouts.B1 ->flowOf()
+        Workouts.B2 ->flowOf()
     }
 }
